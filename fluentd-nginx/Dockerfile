@@ -3,6 +3,9 @@
 FROM kazunori279/fluentd 
 MAINTAINER kazunori279-at-gmail.com
 
+# settings
+ENV NORIKRA_SERVER_HOST docker-test1
+
 # nginx
 RUN apt-get install -y nginx
 ADD nginx.conf /etc/nginx/nginx.conf
