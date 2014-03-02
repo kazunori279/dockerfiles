@@ -17,7 +17,7 @@ ENV PATH /usr/lib/jruby/jruby-1.7.10/bin:$PATH
 
 # norikra
 RUN gem install norikra --no-ri --no-rdoc -V
-RUN mkdir -p /var/log/norikra && norikra start -Xmx2g --daemonize --pidfile /var/run/norikra.pid --logdir=/var/log/norikra
+RUN mkdir -p /var/log/norikra
 
 # fluentd
 RUN curl -O http://packages.treasure-data.com/debian/RPM-GPG-KEY-td-agent && apt-key add RPM-GPG-KEY-td-agent && rm RPM-GPG-KEY-td-agent
