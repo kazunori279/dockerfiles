@@ -10,7 +10,7 @@ MAINTAINER kazunori279-at-gmail.com
 ADD td-agent.conf /etc/td-agent/td-agent.conf.tmp
 
 # https plugin
-RUN curl https://raw.github.com/kazunori279/fluent-plugin-out-https/v.0.1.0/lib/fluent/plugin/out_https.rb -o /etc/td-agent/plugin/out_https.rb
+RUN curl https://raw.github.com/kazunori279/fluent-plugin-out-https/v.0.1.1/lib/fluent/plugin/out_https.rb -o /etc/td-agent/plugin/out_https.rb
 
 # start and open services
 EXPOSE 26578
