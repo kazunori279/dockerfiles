@@ -1,5 +1,5 @@
 FROM ubuntu:12.04
-MAINTAINER kazunori279@gmail.com
+MAINTAINER kazunori279-at-gmail.com
 
 # environment
 ENV DEBIAN_FRONTEND noninteractive
@@ -16,7 +16,7 @@ RUN tar xzf jruby-bin-1.7.10.tar.gz && mkdir -p /usr/lib/jruby && mv jruby-1.7.1
 ENV PATH /usr/lib/jruby/jruby-1.7.10/bin:$PATH
 
 # norikra
-RUN gem install norikra --no-ri --no-rdoc -V
+RUN gem install norikra -V --no-ri --no-rdoc 
 RUN mkdir -p /var/log/norikra
 
 # fluentd

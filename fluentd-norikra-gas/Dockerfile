@@ -16,4 +16,4 @@ RUN curl https://raw.github.com/kazunori279/fluent-plugin-out-https/v.0.1.1/lib/
 EXPOSE 26578
 EXPOSE 26571
 EXPOSE 24224
-ENTRYPOINT sed -e "s@%%GAS_URL%%@$GAS_URL@" /etc/td-agent/td-agent.conf.tmp > /etc/td-agent/td-agent.conf && norikra start -Xmx2g --pidfile /var/run/norikra.pid --logdir=/var/log/norikra --daemonize && /etc/init.d/td-agent restart && /bin/bash 
+ENTRYPOINT sed -e "s@%%GAS_URL%%@$GAS_URL@" /etc/td-agent/td-agent.conf.tmp > /etc/td-agent/td-agent.conf && norikra start --more-verbose -Xmx2g --pidfile /var/run/norikra.pid --logdir=/var/log/norikra --daemonize && /etc/init.d/td-agent restart && /bin/bash 
