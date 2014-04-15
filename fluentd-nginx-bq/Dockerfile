@@ -1,9 +1,9 @@
 # Dockerfile for fluentd + nginx
 #
 # Usage:
-# sudo docker run -e NORIKRA_IP=<<YOUR NORIKRA SERVER IP>> -p 80:80 -t -i -d kazunori279/fluentd-nginx 
+# sudo docker run -e NORIKRA_IP=<<YOUR NORIKRA SERVER IP>> -p 80:80 -t -i -d kazunori279/fluentd-nginx-bq 
 
-FROM kazunori279/fluentd 
+FROM kazunori279/fluentd-norikra
 MAINTAINER kazunori279-at-gmail.com
 
 # nginx
@@ -22,5 +22,5 @@ ADD td-agent.conf /etc/td-agent/td-agent.conf.tmp
 
 # start and open services
 EXPOSE 80
-ENTRYPOINT sed -e "s/%%NORIKRA_IP%%/$NORIKRA_IP/" /etc/td-agent/td-agent.conf.tmp > /etc/td-agent/td-agent.conf && /etc/init.d/td-agent restart && /etc/init.d/nginx start && /bin/bash 
+ENTRYPOINT sed -e "s/%%NORIKRA_IP%%/$NORIKRA_IP/" /etc/td-agent/td-agent.conf.tmp > /etc/td-agent/td-agent.conf && norikra start --more-verbose -Xmx2g --pidfile /var/run/norikra.pid --logdir=/var/log/norikra --daemonize && /etc/init.d/td-agent restart && /etc/init.d/nginx start && /bin/bash 
 
