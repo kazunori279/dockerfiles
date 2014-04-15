@@ -1,5 +1,5 @@
 FROM ubuntu:12.04
-MAINTAINER kazunori279@gmail.com
+MAINTAINER kazunori279-at-gmail.com
 
 # environment
 ENV DEBIAN_FRONTEND noninteractive
