@@ -9,4 +9,4 @@ RUN echo "deb http://archive.ubuntu.com/ubuntu precise main universe" > /etc/apt
 RUN apt-get -y install apache2-utils
 
 # run bash
-ENTRYPOINT /bin/bash
+CMD /bin/bash
