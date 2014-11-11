@@ -15,8 +15,7 @@ This sample explains the following steps to set up a [Fluentd](http://www.fluent
 - If you have not signed up with BigQuery yet, follow the instruction in [Sign Up for BigQuery](https://cloud.google.com/bigquery/sign-up) page to create a project.
 - To set up a billing, select the project, click `Billing & settings` and `Enable billing` button. Enter billing profile accordingly.
 - Open [BigQuery Browser Tool](https://console.developers.google.com/)
-
-- Execute the following sample query with the tool to check you can access BigQuery.
+- Click `COMPOSE QUERY` button at top left and execute the following sample query with the tool to check you can access BigQuery.
 
 ```
 SELECT title FROM [publicdata:samples.wikipedia] WHERE REGEXP_MATCH(title, r'.*Query.*') LIMIT 100
@@ -88,7 +87,7 @@ $ bq mk YOUR_PROJECT_ID:bq_test
 $ bq mk -t YOUR_PROJECT_ID:bq_test.access_log ./schema.json
 ```
 
-- Open the Browser Tool, select your project, `bq_test` dataset and `access_log` table. Confirm that the table has been created with the specified schema correctly.
+- Reload the BigQuery Browser Tool page, select your project, `bq_test` dataset and `access_log` table. Confirm that the table has been created with the specified schema correctly.
 
 ## Creating a Google Compute Engine instance
 
@@ -126,13 +125,13 @@ $ sudo docker run -e GCP_PROJECT="YOUR_PROJECT_ID" -p 80:80 -t -i -d kazunori279
 
 - Open [Google Developers Console](https://console.developers.google.com/project) on a browser, choose your project and select `Compute` - `Compute Engine` - `VM instances`.
 
-- Find `bq-test` GCE instance and click it's external IP link. On the dialog, select `Allow HTTP traffic` and click `Apply` to add the firewall rule.
+- Find `bq-test` GCE instance and click it's external IP link. On the dialog, select `Allow HTTP traffic` and click `Apply` to add the firewall rule. There will be an Activities dialow shown on the display with a message `Updating instance tags for "bq-test"`.
 
-- After applying the role, click the external IP link again to access nginx server on the instance. It will show a blank web page titled "Welcome to nginx!". Click reload button several times.
+- After updating instance tags, click the external IP link again to access nginx server on the instance. It will show a blank web page titled "Welcome to nginx!". Click reload button several times.
 
 ## Execute BigQuery query
 
-- Open BigQuery Browser Tool, execute the following query. You will see the requests from browser are recorded on access_log table (it may take a few minutes to receive the log for the first time).
+- Open BigQuery Browser Tool, click `COMPOSE QUERY` and execute the following query. You will see the requests from browser are recorded on access_log table (it may take a few minutes to receive the log for the first time).
 
 ```
 SELECT * FROM [bq_test.access_log] LIMIT 1000
