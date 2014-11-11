@@ -1,6 +1,6 @@
 # Fluentd + Google BigQuery Getting Started Sample
 
-This sample explains the following steps to set up a [Fluentd](http://www.fluentd.org/) + [Google BigQuery](https://cloud.google.com/bigquery/) integration in a [Docker](https://www.docker.com/) container that sends [nginx](http://nginx.org/en/) web server access log to the BigQuery in realtime.
+This sample explains how to set up a [Fluentd](http://www.fluentd.org/) + [Google BigQuery](https://cloud.google.com/bigquery/) integration in a [Docker](https://www.docker.com/) container that sends [nginx](http://nginx.org/en/) web server access log to the BigQuery in real time. The whole process may take only 20 - 30 minutes with the following steps:
 
 - Sign Up for BigQuery
 - Creating a dataset and table on Google BigQuery
@@ -102,7 +102,7 @@ $ gcloud config set project YOUR_PROJECT_ID
 
 ```
 $ gcloud compute instances create "bq-test" \
-  --zone "us-central1-a" --machine-type "n1-standard-2" \
+  --zone "us-central1-a" --machine-type "n1-standard-1" \
   --network "default" --maintenance-policy "MIGRATE" \
   --scopes "https://www.googleapis.com/auth/devstorage.read_only" \
   "https://www.googleapis.com/auth/bigquery" \
