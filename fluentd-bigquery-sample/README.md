@@ -145,32 +145,7 @@ That's it! You've just confirmed the nginx log are collected by Fluentd, importe
 If you take a look at the [Dockerfile](https://github.com/kazunori279/dockerfiles/blob/master/fluentd-bigquery-sample/Dockerfile), you can learn how the Docker container has been configured. After preparing an Ubuntu image, it installs Fluentd, nginx and the bigquery plugin.
 
 ```
-FROM ubuntu:12.04
-MAINTAINER kazunori279-at-gmail.com
 
-# environment
-ENV DEBIAN_FRONTEND noninteractive
-RUN echo "deb http://archive.ubuntu.com/ubuntu precise main universe" > /etc/apt/sources.list
-
-# update, curl
-RUN apt-get update && apt-get -y upgrade
-RUN apt-get -y install curl 
-
-# fluentd
-RUN curl -O http://packages.treasure-data.com/debian/RPM-GPG-KEY-td-agent && apt-key add RPM-GPG-KEY-td-agent && rm RPM-GPG-KEY-td-agent
-RUN curl -L http://toolbelt.treasuredata.com/sh/install-ubuntu-precise.sh | sh
-ADD td-agent.conf /etc/td-agent/td-agent.conf
-
-# nginx
-RUN apt-get install -y nginx
-ADD nginx.conf /etc/nginx/nginx.conf
-
-# fluent-plugin-bigquery
-RUN /usr/lib/fluent/ruby/bin/fluent-gem install fluent-plugin-bigquery --no-ri --no-rdoc -V
-
-# start fluentd and nginx
-EXPOSE 80
-ENTRYPOINT /etc/init.d/td-agent restart && /etc/init.d/nginx start && /bin/bash
 ```
 
 In the [td-agent.conf](https://github.com/kazunori279/dockerfiles/blob/master/fluentd-bigquery-sample/td-agent.conf) file, you can see how to configure it to forward Fluentd logs to BigQuery plugin. It's as simple as the following:

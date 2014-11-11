@@ -3,7 +3,7 @@
 #
 # This image will run nginx, fluentd and bigquery plugin to send access log to BigQuery.
 #
-# Usage: $ sudo docker run -p 80:80 -t -i -d kazunori279/fluentd-bigquery-sample
+# Usage: $ sudo docker run -e GCP_PRJECT_ID=<<YOUR_PROJECT_ID>> -p 80:80 -t -i -d kazunori279/fluentd-bigquery-sample
 #
 
 FROM ubuntu:12.04
