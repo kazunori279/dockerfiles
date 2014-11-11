@@ -5,9 +5,12 @@ This sample explains the following steps to set up a [Fluentd](http://www.fluent
 - Sign Up for BigQuery
 - Creating a dataset and table on Google BigQuery
 - Creating an instance of Google Compute Engine (GCE)
-- Run the sample Docker container
+- Run nginx + Fluentd with Docker container
+- Execute BigQuery query
 
-## Sign Up for BigQuery (If you have not done yet)
+## Sign Up for BigQuery
+
+(You can skip this section if you have done before)
 
 - If you have not signed up with BigQuery yet, follow the instruction in [Sign Up for BigQuery](https://cloud.google.com/bigquery/sign-up) page to create a project.
 - To set up a billing, select the project, click `Billing & settings` and `Enable billing` button. Enter billing profile accordingly.
@@ -135,7 +138,7 @@ $ sudo docker run -p 80:80 -t -i -d kazunori279/fluentd-bigquery-sample
 SELECT * FROM [bq_test.access_log] LIMIT 1000
 ```
 
-That's it! You've just confirmed the nginx log are collected by Fluentd, imported to BigQuery and shown on the Browser Tool.
+That's it! You've just confirmed the nginx log are collected by Fluentd, imported to BigQuery and shown on the Browser Tool. You may use Apache Bench tool or etc to hit the web page with more traffic to see how Fluentd + BigQuery can handle high volume logs in real time. It can support up to 10K rows/sec by default (and you can extend it to 100K rows/sec by requesting).
 
 ## Inside Dockerfile and td-agent.conf
 
