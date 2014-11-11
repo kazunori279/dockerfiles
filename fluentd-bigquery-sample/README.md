@@ -118,10 +118,10 @@ $ gcloud compute instances create "bq-test" \
 $ gcloud compute ssh bq-test --zone=us-central1-a
 ```
 
-- In the GCE instance, run the following command. This will start downloading a Docker image `kazunori279/fluentd-bigquery-sample` which contains nginx + Fluentd + bigquery plugin.
+- In the GCE instance, run the following command (replace `YOUR_PROJECT_ID` with your project id). This will start downloading a Docker image `kazunori279/fluentd-bigquery-sample` which contains nginx web server with Fluentd.
 
 ```
-$ sudo docker run -p 80:80 -t -i -d kazunori279/fluentd-bigquery-sample
+$ sudo docker run -e GCP_PROJECT="YOUR_PROJECT_ID" -p 80:80 -t -i -d kazunori279/fluentd-bigquery-sample
 ```
 
 - Open [Google Developers Console](https://console.developers.google.com/project) on a browser, choose your project and select `Compute` - `Compute Engine` - `VM instances`.
@@ -145,7 +145,33 @@ That's it! You've just confirmed the nginx log are collected by Fluentd, importe
 If you take a look at the [Dockerfile](https://github.com/kazunori279/dockerfiles/blob/master/fluentd-bigquery-sample/Dockerfile), you can learn how the Docker container has been configured. After preparing an Ubuntu image, it installs Fluentd, nginx and the bigquery plugin.
 
 ```
+FROM ubuntu:12.04
+MAINTAINER kazunori279-at-gmail.com
 
+# environment
+ENV DEBIAN_FRONTEND noninteractive
+RUN echo "deb http://archive.ubuntu.com/ubuntu precise main universe" > /etc/apt/sources.list
+
+# update, curl, sudo
+RUN apt-get update && apt-get -y upgrade
+RUN apt-get -y install curl 
+RUN apt-get install sudo
+
+# fluentd
+RUN curl -O http://packages.treasure-data.com/debian/RPM-GPG-KEY-td-agent && apt-key add RPM-GPG-KEY-td-agent && rm RPM-GPG-KEY-td-agent
+RUN curl -L http://toolbelt.treasuredata.com/sh/install-ubuntu-precise-td-agent2.sh | sh 
+ADD td-agent.conf /etc/td-agent/td-agent.conf
+
+# nginx
+RUN apt-get install -y nginx
+ADD nginx.conf /etc/nginx/nginx.conf
+
+# fluent-plugin-bigquery
+RUN /usr/sbin/td-agent-gem install fluent-plugin-bigquery --no-ri --no-rdoc -V
+
+# start fluentd and nginx
+EXPOSE 80
+ENTRYPOINT /etc/init.d/td-agent restart && /etc/init.d/nginx start && /bin/bash
 ```
 
 In the [td-agent.conf](https://github.com/kazunori279/dockerfiles/blob/master/fluentd-bigquery-sample/td-agent.conf) file, you can see how to configure it to forward Fluentd logs to BigQuery plugin. It's as simple as the following:
@@ -155,7 +181,7 @@ In the [td-agent.conf](https://github.com/kazunori279/dockerfiles/blob/master/fl
   type bigquery
   auth_method compute_engine
 
-  project YOUR_PROJECT_ID
+  project "#{ENV['GCP_PROJECT']}"
   dataset bq_test
   tables access_log
 
@@ -165,6 +191,8 @@ In the [td-agent.conf](https://github.com/kazunori279/dockerfiles/blob/master/fl
   field_integer time
 </match>
 ```
+
+Since you are running the GCE instance within the same GCP project of BigQuery dataset, you don't have to copy any private key file to the GCE instance for OAuth2 authentication. ` "#{ENV['GCP_PROJECT']}"` refers to your project id passed through the environment variable.
 
 ## Cleaning Up
 
