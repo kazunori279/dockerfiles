@@ -13,8 +13,6 @@ This sample explains the following steps to set up a [Fluentd](http://www.fluent
 - To set up a billing, select the project, click `Billing & settings` and `Enable billing` button. Enter billing profile accordingly.
 - Open [BigQuery Browser Tool](https://console.developers.google.com/)
 
-![BigQuery Browser Tool](https://qiita-image-store.s3.amazonaws.com/0/38290/a2cb8721-b94e-20c4-2b78-1b0cc2fa0865.png)
-
 - Execute the following sample query with the tool to check you can access BigQuery.
 
 ```
@@ -38,7 +36,7 @@ $ gcloud auth login
 $ bq mk YOUR_PROJECT_ID:bq_test
 ```
 
-- Create a file `schema.json` at your current directory with the following content:
+- Create a file [schema.json](https://github.com/kazunori279/dockerfiles/blob/master/fluentd-bigquery-sample/schema.json) at your current directory with the following content:
 
 ```
 [
@@ -92,10 +90,16 @@ $ bq mk -t YOUR_PROJECT_ID:bq_test.access_log ./schema.json
 ## Creating a Google Compute Engine instance
 
 - If you have not signed up with GCE yet, follow the instruction in [Sign Up for Google Compute Engine](https://cloud.google.com/compute/docs/signup) page to enable GCE.
+- Run the follwoing command to set default project to your project id.
+
+```
+$ gcloud config set project YOUR_PROJECT_ID
+```
+
 - Run the following command to create a GCE instance named `bq-test`. This will take around 30 secs.
 
 ```
-$ gcloud compute --project "YOUR_PROJECT_ID" instances create "bq-test" \
+$ gcloud compute instances create "bq-test" \
   --zone "us-central1-a" --machine-type "n1-standard-2" \
   --network "default" --maintenance-policy "MIGRATE" \
   --scopes "https://www.googleapis.com/auth/devstorage.read_only" \
@@ -103,6 +107,95 @@ $ gcloud compute --project "YOUR_PROJECT_ID" instances create "bq-test" \
   --image container-vm-v20140929 --image-project google-containers
 ```
 
-## Run the sample Docker container
+## Run nginx + Fluentd with Docker container
+
+- Enter the following command to log in to the GCE instance.
+
+``` 
+$ gcloud compute ssh bq-test --zone=us-central1-a
+```
+
+- In the GCE instance, run the following command. This will start downloading a Docker image `kazunori279/fluentd-bigquery-sample` which contains nginx + Fluentd + bigquery plugin.
+
+```
+$ sudo docker run -p 80:80 -t -i -d kazunori279/fluentd-bigquery-sample
+```
+
+- Open [Google Developers Console](https://console.developers.google.com/project) on a browser, choose your project and select `Compute` - `Compute Engine` - `VM instances`.
+
+- Find `bq-test` GCE instance and click it's external IP link. On the dialog, select `Allow HTTP traffic` and click `Apply` to add the firewall rule.
+
+- After applying the role, click the external IP link again to access nginx server on the instance. It will show a blank web page titled "Welcome to nginx!". Click reload button several times.
+
+## Execute BigQuery query
+
+- Open BigQuery Browser Tool, execute the following query. You will see the requests from browser are recorded on access_log table (it may take a few minutes to receive the log for the first time).
+
+```
+SELECT * FROM [bq_test.access_log] LIMIT 1000
+```
+
+That's it! You've just confirmed the nginx log are collected by Fluentd, imported to BigQuery and shown on the Browser Tool.
+
+## Inside Dockerfile and td-agent.conf
+
+If you take a look at the [Dockerfile](https://github.com/kazunori279/dockerfiles/blob/master/fluentd-bigquery-sample/Dockerfile), you can learn how the Docker container has been configured. After preparing an Ubuntu image, it installs Fluentd, nginx and the bigquery plugin.
+
+```
+FROM ubuntu:12.04
+MAINTAINER kazunori279-at-gmail.com
+
+# environment
+ENV DEBIAN_FRONTEND noninteractive
+RUN echo "deb http://archive.ubuntu.com/ubuntu precise main universe" > /etc/apt/sources.list
+
+# update, curl
+RUN apt-get update && apt-get -y upgrade
+RUN apt-get -y install curl 
+
+# fluentd
+RUN curl -O http://packages.treasure-data.com/debian/RPM-GPG-KEY-td-agent && apt-key add RPM-GPG-KEY-td-agent && rm RPM-GPG-KEY-td-agent
+RUN curl -L http://toolbelt.treasuredata.com/sh/install-ubuntu-precise.sh | sh
+ADD td-agent.conf /etc/td-agent/td-agent.conf
+
+# nginx
+RUN apt-get install -y nginx
+ADD nginx.conf /etc/nginx/nginx.conf
+
+# fluent-plugin-bigquery
+RUN /usr/lib/fluent/ruby/bin/fluent-gem install fluent-plugin-bigquery --no-ri --no-rdoc -V
+
+# start fluentd and nginx
+EXPOSE 80
+ENTRYPOINT /etc/init.d/td-agent restart && /etc/init.d/nginx start && /bin/bash
+```
+
+In the [td-agent.conf](https://github.com/kazunori279/dockerfiles/blob/master/fluentd-bigquery-sample/td-agent.conf) file, you can see how to configure it to forward Fluentd logs to BigQuery plugin. It's as simple as the following:
+
+```
+<match nginx.access>
+  type bigquery
+  auth_method compute_engine
+
+  project YOUR_PROJECT_ID
+  dataset bq_test
+  tables access_log
+
+  time_format %s
+  time_field time
+  fetch_schema true
+  field_integer time
+</match>
+```
+
+## Cleaning Up
+
+- Execute the following command to delete GCE instance.
+
+```
+gcloud compute instances delete bq-test --zone=us-central1-a
+```
+
+- On BigQuery Browser Tool, click the drop down menu of `bq_test` dataset and select `Delete dataset`
 
 
